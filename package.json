@@ -1,0 +1,18 @@
+{
+  "publisher": "SqueakyLlama",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "pm2 start main.js --name Cloudy",
+    "stop": "pm2 stop Cloudy",
+    "restart": "pm2 restart Cloudy",
+    "list": "pm2 list",
+    "open-logs": "pm2 logs Cloudy",
+    "delete": "pm2 delete Cloudy",
+    "start-no-pm2": "node main.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.4",
+    "node-cron": "^4.5.0"
+  }
+}

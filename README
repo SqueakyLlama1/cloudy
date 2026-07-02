@@ -1,0 +1,7 @@
+Dependencies:
+    Discord.js (will auto install with `npm install`)
+    PM2 (You need to install this globally with `npm install pm2 -g`)
+
+Cloudy All In One Bot for Squeakys Playpen Discord and Minecraft servers
+
+All .bat scripts must be run as administrator!
