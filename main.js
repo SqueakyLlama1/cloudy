@@ -1,9 +1,24 @@
 import * as fs from 'node:fs/promises';
-import { Client, IntentsBitField } from 'discord.js';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cron from 'node-cron';
 
-import * as reminders from './modules/reminders.js';
-import * as easter_eggs from './modules/easter_eggs.js';
+import { Client, IntentsBitField } from 'discord.js';
+
+import { initReminders } from './modules/reminders.js';
+import { initEasterEggs } from './modules/easter_eggs.js';
+import { initCommands } from './modules/commands.js';
+import { initRules } from './modules/rules.js';
+import { initFilters } from './modules/filters.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const channels = {
+    "logs": {
+        "messages": "1499490762507948073"
+    }
+};
 
 const command_prefix = `~`;
 
@@ -16,13 +31,26 @@ const client = new Client({
     ]
 });
 
-const initReminders = reminders.initReminders;
-const initEasterEggs = easter_eggs.initEasterEggs;
-
-client.on('ready', async () => {
-    const secret = await fs.readFile('Cloudy-Secret.txt', {encoding:"utf-8"});
-    await initReminders(client);
-    await initEasterEggs(client, command_prefix);
-    
-    client.login(secret);
+client.on('clientReady', async () => {
+    try {
+        const rawData = await fs.readFile(path.join(__dirname, 'FilteredWords.txt'), { encoding: "utf-8" });  // This is put in a separate file that is on the Git ignore list to keep code auditors comfortable as they read. This file contains a lot of objectional words in order to tell the code what to filter out.
+        const filteredWordsArray = rawData.split(/\r?\n/).map(word => word.trim()).filter(word => word.length > 0);
+        
+        initFilters(client, filteredWordsArray, channels.logs.messages);
+        
+        await initReminders(client);
+        await initCommands(client, command_prefix);
+        await initRules(client);
+        await initEasterEggs(client, command_prefix);
+        
+    } catch (error) {
+        console.error("Failed to initialize bot configurations:", error);
+    }
 });
+
+async function startBot() {
+    const secret = await fs.readFile(path.join(__dirname, 'CloudySecret.txt'), {encoding:"utf-8"}); // This is put in a separate file that is on the Git ignore list to keep the bots privacy.
+    client.login(secret);
+}
+
+startBot();

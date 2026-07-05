@@ -1,4 +1,5 @@
 @echo off
 cd /d "%~dp0"
+call npm run clear-logs
 call npm run restart
 pause
