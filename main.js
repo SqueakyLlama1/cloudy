@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import cron from 'node-cron';
 import * as mongoose from 'mongoose';
+import { Level } from './models/Levels.js';
 
 import { Client, IntentsBitField } from 'discord.js';
 
@@ -43,10 +44,34 @@ client.on('clientReady', async () => {
         await initCommands(client, command_prefix);
         await initRules(client);
         await initEasterEggs(client, command_prefix);
+        const members = guild.members.cache.filter((m) => !m.user.bot);
+        for (const [key, member] of members) {
+            const accountId = member.user.id;
+            const existingLevel = await Level.findOne({ accountId });
+            if (!existingLevel) {
+                const newLevel = new Level({
+                    created: new Date(),
+                    level: 0,
+                    accountId: accountId
+                });
+                await newLevel.save();
+            } 
+        }
         
     } catch (error) {
         console.error("Failed to initialize bot configurations:", error);
     }
+});
+
+client.on('guildMemberAdd', member => {
+    const guild = member.guild;
+    const accountId = member.user.id;
+    const newLevel = new Level({
+                    created: new Date(),
+                    level: 0,
+                    accountId: accountId
+                });
+    await newLevel.save();
 });
 
 async function startBot() {
