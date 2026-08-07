@@ -1,4 +1,5 @@
-export const initFilters = async (client, filteredWords = [], messageLogsChannelId) => {
+export const initFilters = async (client, filteredWords = [], channels) => {
+    const messageLogsChannelId = channels.staff.logs.messages;
     const messageLogsChannel = await client.channels.fetch(messageLogsChannelId);
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;

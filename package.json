@@ -3,10 +3,10 @@
   "type": "module",
   "license": "Apache-2.0",
   "scripts": {
-    "restart": "pm2 restart main --update-env",
+    "restart": "pm2 restart Cloudy --update-env",
     "list": "pm2 list",
-    "open-logs": "pm2 logs main",
-    "clear-logs": "pm2 flush main"
+    "open-logs": "pm2 logs Cloudy",
+    "clear-logs": "pm2 flush Cloudy"
   },
   "dependencies": {
     "discord.js": "^14.26.4",

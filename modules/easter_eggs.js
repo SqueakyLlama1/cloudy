@@ -1,59 +1,76 @@
-let pongCount = 0;
-let lastPongTime = null;
-let isOnBreak = false;
-let breakEndTime = null;
+import { Events } from 'discord.js';
 
-function wait(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-export const initEasterEggs = async (client, command_prefix) => {
-    client.on('messageCreate', async (message) => {
+export const initEasterEggs = async (client, roles, emojis) => {
+    
+    client.on(Events.InteractionCreate, async (interaction) => {
+        if (!interaction.isChatInputCommand()) return;
+
+        const { commandName } = interaction;
+        const currentTime = Date.now();
+
+        // /willowmode Slash Command
+        if (commandName === 'willowmode') {
+            await interaction.reply(`willow is sooo cool`);
+            await wait(1000);
+            await interaction.followUp(`and theyre NOT tiny`);
+            return;
+        }
+
+        // /squeakymode Slash Command
+        if (commandName === 'squeakymode') {
+            await interaction.reply(`squeaky is soo itty bitty and tiny`);
+            await wait(1000);
+            await interaction.followUp(`vewy smol`);
+            return;
+        }
+    });
+
+    client.on(Events.MessageCreate, async (message) => {
         if (message.author.bot) return;
         const botPinged = message.mentions.has(client.user);
         
-        // Ping-Pong Easter Egg
-        if (message.content.toLowerCase() === `${command_prefix}ping`) {
-            const currentTime = Date.now();
+        // -------- Emoji Easter Eggs --------
+        
+        // Bite
+        if (botPinged && message.content.includes(emojis.bite)) {
+            await message.reply(`HEY! That hurt!! Please don't bite me :c`);
+            return;
+        }
+        
+        // Hug
+        if (botPinged && emojis.categories.hug.some(hugEmoji => message.content.includes(hugEmoji))) {
+            if (!message.guild || !message.member) return;
             
-            if (isOnBreak) {
-                if (currentTime < breakEndTime) {
-                    const timeLeft = Math.ceil((breakEndTime - currentTime) / 1000);
-                    await message.reply(`My arm is tired. I'm taking a break. Let's keep playing in **${timeLeft} seconds**.`);
-                    return;
-                } else {
-                    isOnBreak = false;
-                    pongCount = 0;
-                }
-            }
+            const freshMember = await message.guild.members.fetch({ user: message.author.id, force: true });
+            const memberRoles = freshMember.roles.cache;
             
-            if (lastPongTime && (currentTime - lastPongTime <= 60000)) {
-                pongCount++;
-            } else {
-                pongCount = 1;
-            }
+            const hasLittleRole = memberRoles.has(roles.littlespace.little);
+            const hasCaregiverRole = memberRoles.has(roles.littlespace.caregiver);
+            const hasSwitchRole = memberRoles.has(roles.littlespace.switch);
             
-            lastPongTime = currentTime;
-            
-            if (pongCount >= 5) {
-                isOnBreak = true;
-                breakEndTime = currentTime + 30000;
-                await message.reply(`My arm is getting tired :c\nCan we please take a break?`);
+            if ((hasLittleRole && hasCaregiverRole) || hasSwitchRole) {
+                await message.reply(emojis.cg_hold_bab);
                 return;
             }
-            
-            await message.reply(`🏓 Pong!`);
+            if (hasLittleRole) {
+                await message.reply(emojis.cuddles);
+                return;
+            }
+            if (hasCaregiverRole) {
+                await message.reply(emojis.cg_hold_bab);
+                return;
+            }
+            await message.reply(emojis.cuddles);
             return;
         }
         
-        
-        // Bite Easter Egg
-        if (botPinged && message.content.includes('<:bite:1465757765426348187>')) {
-            await message.reply(`HEY! That's not nice!!! That HURT! <:tantrum:1478184349961683045>`);
-            return;
-        }
+        // -------- Keyword Easter Eggs --------
         
         // Tiny Easter Egg
         if (botPinged && message.content.toLowerCase().includes('tiny')) {
-            await message.reply(`<:raspberry:1488606658727772320>`);
+            await message.reply(emojis.raspberry);
             return;
         }
         
@@ -62,24 +79,8 @@ export const initEasterEggs = async (client, command_prefix) => {
             await message.reply(`Yesn't`);
             return;
         }
-
-        // My better coded kjsdhflksdkjfhsdkjf willow.py javascript sucks
-        if (message.content.toLowerCase() === `${command_prefix}willowmode`) {
-            await message.reply(`willow is sooo cool`);
-            await wait(1000);
-            await message.channel.send(`and theyre NOT tiny`);
-            return;
-        }
-
-        // Squeaky Code
-        if (message.content.toLowerCase() === `${command_prefix}squeakymode`) {
-            await message.reply(`squeaky is soo itty bitty and tiny`);
-            await wait(1000);
-            await message.channel.send(`vewy smol`);
-            return;
-        }
-
-        // Funny
+        
+        // Funny (Im big)
         if (message.content.toLowerCase() === `im big`) {
             await message.reply(`hey ${message.author}! lying is bad, tiny`);
             return;

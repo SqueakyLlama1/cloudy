@@ -15,7 +15,6 @@ const rules = {
     "2.5": "Do not advertise yourself. We are a TBDL focused server, but we are not a looking server. You are not permitted to primarily send messages that are looking for a CG, or a Little.",
     "2.6": "Respect all staff members and respect their authority. If you don't like how a situation was handled, bring it up in a ticket. You are not permitted to hurl insults at anyone.",
     "2.7": "Attempting to find 'loopholes' in the rules, and using that as plausible deniability will be rewarded with infractions. Even if it isn't explicitly said, if you believe it doesn't belong in the server, it doesn't. Use your brain."
-    
 };
 
 export const initRules = async (client) => {
