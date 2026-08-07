@@ -1,5 +1,6 @@
 node_modules
 CloudySecret.txt
+FilteredWords.txt
 emojis
 tracked_messages.json
 bump_state.json
