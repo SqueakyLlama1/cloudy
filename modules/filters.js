@@ -6,7 +6,7 @@ export const initFilters = async (client, filteredWords = [], channels) => {
         const botPinged = message.mentions.has(client.user);
 
         // Invite Filter
-        if (message.content.toLowerCase() === `discord.gg/`) {
+        if (message.content.toLowerCase().includes(`discord.gg/`) || message.content.toLowerCase().includes(`discord.com/invite/`)) {
             await messageLogsChannel.send(`${message.author} Deleted Invite:\n\`\`${message.content}\`\``);
             await message.channel.send(`${message.author} You aren't able to send invite links in here.`);
             message.delete();

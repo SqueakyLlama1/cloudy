@@ -15,6 +15,8 @@ import { initRules } from './modules/rules.js';
 import { initFilters } from './modules/filters.js';
 import { initGames } from './modules/games.js';
 import { initReactionRoles } from './modules/reaction_roles.js';
+import { initLevels } from './modules/levels.js';
+import pool from "./utils/database.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,7 +32,8 @@ const channels = {
         }
     },
     "miscellaneous": {
-        "bump": "1471790641879973899"
+        "bump": "1471790641879973899",
+        "levels": "1471914279711150241"
     }
 };
 
@@ -169,6 +172,7 @@ client.once('clientReady', async () => {
         await initReminders(client, channels, roles);
         await initEasterEggs(client, roles, emojis);
         await initGames(client);
+        await initLevels(client, channels);
         
         console.log("Cloudy has been loaded.");
     } catch (error) {
@@ -176,9 +180,23 @@ client.once('clientReady', async () => {
     }
 });
 
+async function connectDatabase() {
+    try {
+        const connection = await pool.getConnection();
+
+        console.log("✅ Connected to MariaDB");
+
+        connection.release();
+    } catch (err) {
+        console.error("❌ Failed to connect to MariaDB:", err);
+        process.exit(1); 
+    }
+}
+
 async function startBot() {
     secret = await fs.readFile(path.join(__dirname, 'CloudySecret.txt'), {encoding:"utf-8"});
     client.login(secret);
+    await connectDatabase();
 }
 
 async function downloadFile(url, outputPath) {
