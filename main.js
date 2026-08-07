@@ -64,7 +64,7 @@ client.on('clientReady', async () => {
     }
 });
 
-client.on('guildMemberAdd', member => {
+client.on('guildMemberAdd', member, async () => {
     const guild = member.guild;
     const accountId = member.user.id;
     const newLevel = new Level({

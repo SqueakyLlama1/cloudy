@@ -12,6 +12,6 @@ const LevelSchema = new mongoose.Schema(
     }
 );
 
-const L = mongoose.model("Level", LevelSchema);
+const Level = mongoose.model("Level", LevelSchema);
 
 export default Level;
