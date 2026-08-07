@@ -5,16 +5,21 @@ export const initLevels = async (client, command_prefix) => {
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;
         // Add XP for each message sent
-        let user = await Level.findOne({ accountId: message.author.id });
-        user.levelProgress += xpPerMessage;
-        if (user.levelProgress >= levelUpXP) {
-            user.level += 1;
-            user.levelProgress = 0;
-            await message.channel.send(`${message.author} has leveled up to level ${user.level}!`);
+        function addXP() {
+            if (message.content.startsWith(command_prefix)) return; // Don't add XP for commands
+            let user = await Level.findOne({ accountId: message.author.id });
+            user.levelProgress += xpPerMessage;
+            if (user.levelProgress >= levelUpXP) {
+                user.level += 1;
+                user.levelProgress = 0;
+                await message.channel.send(`${message.author} has leveled up to level ${user.level}!`);
+                return user.save();
+            }
         }
-
+        addXP();
         // Check level command
         if (message.content.toLowerCase() === `${command_prefix}checklevel`) {
+            let user = await Level.findOne({ accountId: message.author.id });
             await message.reply(`You are level ${user.level} with ${user.levelProgress} XP.`);
             return;
         }
