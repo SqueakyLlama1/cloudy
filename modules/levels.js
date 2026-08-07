@@ -7,6 +7,14 @@ export const initLevels = async (client, command_prefix) => {
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;
 
+        const guild = await client.guilds.fetch(process.env.GUILD_ID || "1463364922103693577");
+        const onlineMembers = guild.members.cache.filter((m) => m.presence?.status == "online" && !m.user.bot).size;
+        if (onlineMembers > 1) {
+            client.user.setActivity(`Watching over ${onlineMembers} members`, { type: "WATCHING" });
+        } else if (onlineMembers === 1) {
+            client.user.setActivity(`Watching over ${onlineMembers} member`, { type: ActivityType.Watching });
+        }
+
         const accountId = message.author.id;
 
         let user = await Level.findOne({ accountId });

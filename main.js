@@ -5,7 +5,7 @@ import cron from 'node-cron';
 import * as mongoose from 'mongoose';
 import Level from './models/Levels.js';
 
-import { Client, IntentsBitField } from 'discord.js';
+import { Client, IntentsBitField, ActivityType } from 'discord.js';
 
 import { initReminders } from './modules/reminders.js';
 import { initEasterEggs } from './modules/easter_eggs.js';
@@ -32,17 +32,25 @@ const client = new Client({
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildMembers,
         IntentsBitField.Flags.GuildMessages,
-        IntentsBitField.Flags.MessageContent
+        IntentsBitField.Flags.MessageContent,
+        IntentsBitField.Flags.GuildPresences
     ]
 });
 
 client.on('clientReady', async () => {
     try {
+        
         const rawData = await fs.readFile(path.join(__dirname, 'FilteredWords.txt'), { encoding: "utf-8" });  // This is put in a separate file that is on the Git ignore list to keep code auditors comfortable as they read. This file contains a lot of objectional words in order to tell the code what to filter out.
         const filteredWordsArray = rawData.split(/\r?\n/).map(word => word.trim()).filter(word => word.length > 0);
         
         initFilters(client, filteredWordsArray, channels.logs.messages);
-        const guild = await client.guilds.fetch(process.env.GUILD_ID || "1463364922103693577"); // Replace with your server ID
+        const guild = await client.guilds.fetch(process.env.GUILD_ID || "1463364922103693577");
+        const onlineMembers = guild.members.cache.filter((m) => m.presence?.status == "online" && !m.user.bot).size;
+        if (onlineMembers > 1) {
+            client.user.setActivity(`Watching over ${onlineMembers} members`, { type: "WATCHING" });
+        } else if (onlineMembers === 1) {
+            client.user.setActivity(`Watching over ${onlineMembers} member`, { type: ActivityType.Watching });
+        }
         const members = guild.members.cache.filter((m) => !m.user.bot);
         for (const member of members.values()) {
             const accountId = member.id;
