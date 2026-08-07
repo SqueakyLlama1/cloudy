@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import cron from 'node-cron';
+import * as mongoose from 'mongoose';
 
 import { Client, IntentsBitField } from 'discord.js';
 
