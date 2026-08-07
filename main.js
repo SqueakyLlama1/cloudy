@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 
 const channels = {
     "logs": {
-        "messages": "1535189598605676587"
+        "messages": "1499490762507948073"
     }
 };
 
@@ -40,7 +40,7 @@ client.on('clientReady', async () => {
         const filteredWordsArray = rawData.split(/\r?\n/).map(word => word.trim()).filter(word => word.length > 0);
         
         initFilters(client, filteredWordsArray, channels.logs.messages);
-        const guild = await client.guilds.fetch("1535189597515153440");
+        const guild = await client.guilds.fetch("1463364922103693577");
         const members = guild.members.cache.filter((m) => !m.user.bot);
         for (const member of members.values()) {
             const accountId = member.id;
