@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import cron from 'node-cron';
 import * as mongoose from 'mongoose';
-import { Level } from './models/Levels.js';
+import Level from './models/Levels.js';
 
 import { Client, IntentsBitField } from 'discord.js';
 
@@ -12,13 +12,14 @@ import { initEasterEggs } from './modules/easter_eggs.js';
 import { initCommands } from './modules/commands.js';
 import { initRules } from './modules/rules.js';
 import { initFilters } from './modules/filters.js';
+import { initLevels } from './modules/levels.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const channels = {
     "logs": {
-        "messages": "1499490762507948073"
+        "messages": "1535189598605676587"
     }
 };
 
@@ -39,12 +40,7 @@ client.on('clientReady', async () => {
         const filteredWordsArray = rawData.split(/\r?\n/).map(word => word.trim()).filter(word => word.length > 0);
         
         initFilters(client, filteredWordsArray, channels.logs.messages);
-        
-        await initReminders(client);
-        await initCommands(client, command_prefix);
-        await initRules(client);
-        await initEasterEggs(client, command_prefix);
-        const guild = await client.guilds.fetch("1463364922103693577");
+        const guild = await client.guilds.fetch("1535189597515153440");
         const members = guild.members.cache.filter((m) => !m.user.bot);
         for (const member of members.values()) {
             const accountId = member.id;
@@ -58,13 +54,20 @@ client.on('clientReady', async () => {
                 });
             }
         }
+        console.log("Initialized bot configurations.");
+        await initReminders(client);
+        await initCommands(client, command_prefix);
+        await initRules(client);
+        await initEasterEggs(client, command_prefix);
+        await initLevels(client, command_prefix);
+        
         
     } catch (error) {
         console.error("Failed to initialize bot configurations:", error);
     }
 });
 
-client.on('guildMemberAdd', member, async () => {
+client.on('guildMemberAdd', async (member) => {
     const guild = member.guild;
     const accountId = member.user.id;
     const newLevel = new Level({
@@ -78,7 +81,7 @@ client.on('guildMemberAdd', member, async () => {
 async function startBot() {
     const secret = await fs.readFile(path.join(__dirname, 'CloudySecret.txt'), {encoding:"utf-8"}); // This is put in a separate file that is on the Git ignore list to keep the bots privacy.
     client.login(secret);
-    mongoose.connect('mongodb://localhost:27017/cloudy', { useNewUrlParser: true, useUnifiedTopology: true })
+    mongoose.connect('mongodb://localhost:27017/cloudy')
         .then(() => {
             console.log('Connected to MongoDB');
         })

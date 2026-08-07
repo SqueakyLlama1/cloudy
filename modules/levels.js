@@ -1,39 +1,65 @@
-import { Level } from '../models/Levels.js';
+import Level from '../models/Levels.js';
+
 const levelUpXP = 25;
 const xpPerMessage = 1;
+
 export const initLevels = async (client, command_prefix) => {
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;
-        // Add XP for each message sent
-        function addXP() {
-            if (message.content.startsWith(command_prefix)) return; // Don't add XP for commands
-            let user = await Level.findOne({ accountId: message.author.id });
+
+        const accountId = message.author.id;
+
+        let user = await Level.findOne({ accountId });
+
+        if (!user) {
+            user = await Level.create({
+                accountId,
+                created: new Date(),
+                level: 0,
+                levelProgress: 0
+            });
+        }
+
+        // Don't add XP to commands
+        if (!message.content.startsWith(command_prefix)) {
             user.levelProgress += xpPerMessage;
+
             if (user.levelProgress >= levelUpXP) {
                 user.level += 1;
                 user.levelProgress = 0;
-                await message.channel.send(`${message.author} has leveled up to level ${user.level}!`);
-                return user.save();
+
+                await message.channel.send(
+                    `${message.author} has leveled up to level ${user.level}!`
+                );
             }
+
+            await user.save();
         }
-        addXP();
+
+
         // Check level command
         if (message.content.toLowerCase() === `${command_prefix}checklevel`) {
-            let user = await Level.findOne({ accountId: message.author.id });
-            await message.reply(`You are level ${user.level} with ${user.levelProgress} XP.`);
+            await message.reply(
+                `You are level ${user.level} with ${user.levelProgress} XP.`
+            );
             return;
         }
 
-        // Get leaderboard command
+
+        // Leaderboard command
         if (message.content.toLowerCase() === `${command_prefix}leaderboard`) {
-            const topUsers = await Level.find().sort({ level: -1, levelProgress: -1 }).limit(10);
+            const topUsers = await Level.find()
+                .sort({ level: -1, levelProgress: -1 })
+                .limit(10);
+
             let leaderboardMessage = 'Leaderboard:\n';
+
             topUsers.forEach((user, index) => {
-                leaderboardMessage += `${index + 1}. <@${user.accountId}> - Level ${user.level} (${user.levelProgress} XP)\n`;
-            }); 
+                leaderboardMessage += 
+                    `${index + 1}. <@${user.accountId}> - Level ${user.level} (${user.levelProgress} XP)\n`;
+            });
+
             await message.channel.send(leaderboardMessage);
-            return;
         }
-        
     });
 };
