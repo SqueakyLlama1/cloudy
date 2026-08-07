@@ -1,4 +1,5 @@
 import Level from '../models/Levels.js';
+import { ActivityType } from 'discord.js';
 
 const levelUpXP = 25;
 const xpPerMessage = 1;
