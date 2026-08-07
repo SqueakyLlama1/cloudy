@@ -13,13 +13,15 @@ import { initCommands } from './modules/commands.js';
 import { initRules } from './modules/rules.js';
 import { initFilters } from './modules/filters.js';
 import { initLevels } from './modules/levels.js';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const channels = {
     "logs": {
-        "messages": "1499490762507948073"
+        "messages": process.env.LOGS_CHANNEL ||"1499490762507948073" 
     }
 };
 
@@ -40,7 +42,7 @@ client.on('clientReady', async () => {
         const filteredWordsArray = rawData.split(/\r?\n/).map(word => word.trim()).filter(word => word.length > 0);
         
         initFilters(client, filteredWordsArray, channels.logs.messages);
-        const guild = await client.guilds.fetch("1463364922103693577");
+        const guild = await client.guilds.fetch(process.env.GUILD_ID || "1463364922103693577"); // Replace with your server ID
         const members = guild.members.cache.filter((m) => !m.user.bot);
         for (const member of members.values()) {
             const accountId = member.id;
