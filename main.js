@@ -44,18 +44,19 @@ client.on('clientReady', async () => {
         await initCommands(client, command_prefix);
         await initRules(client);
         await initEasterEggs(client, command_prefix);
+        const guild = await client.guilds.fetch("1463364922103693577");
         const members = guild.members.cache.filter((m) => !m.user.bot);
-        for (const [key, member] of members) {
-            const accountId = member.user.id;
-            const existingLevel = await Level.findOne({ accountId });
-            if (!existingLevel) {
-                const newLevel = new Level({
+        for (const member of members.values()) {
+            const accountId = member.id;
+
+            const exists = await Level.exists({ accountId });
+            if (!exists) {
+                await Level.create({
                     created: new Date(),
                     level: 0,
-                    accountId: accountId
+                    accountId
                 });
-                await newLevel.save();
-            } 
+            }
         }
         
     } catch (error) {
@@ -77,6 +78,13 @@ client.on('guildMemberAdd', member => {
 async function startBot() {
     const secret = await fs.readFile(path.join(__dirname, 'CloudySecret.txt'), {encoding:"utf-8"}); // This is put in a separate file that is on the Git ignore list to keep the bots privacy.
     client.login(secret);
+    mongoose.connect('mongodb://localhost:27017/cloudy', { useNewUrlParser: true, useUnifiedTopology: true })
+        .then(() => {
+            console.log('Connected to MongoDB');
+        })
+        .catch((err) => {
+            console.error('Failed to connect to MongoDB', err);
+        });
 }
 
 startBot();
