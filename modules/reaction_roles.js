@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dataPath = path.join(__dirname, '..', 'tracked_messages.json');
+const dataPath = path.join(__dirname, '..', 'app_state', 'reaction_role_messages.json');
 
 let EMOJI_TO_ROLE_MAP = {};
 const userQueues = new Map();
@@ -26,7 +26,12 @@ async function saveTrackedData(data) {
 
 function getMapKey(reaction, contextType = '') {
     const name = reaction.emoji.name;
-    if (['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'].includes(name) || ['🟢','🔴','❓','🔵','🟣','🟡','🟠'].includes(name)) {
+    const multiContextEmojis = [
+        '1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟',
+        '🟢','🔴','❓','🔵','🟣','🟡','🟠','✅','🚫','🛑'
+    ];
+
+    if (multiContextEmojis.includes(name)) {
         return contextType ? `${name}_${contextType}` : name;
     }
     return name;
@@ -39,7 +44,7 @@ function enqueueTask(userId, taskFn) {
     const currentQueue = userQueues.get(userId);
     const nextQueue = currentQueue.then(() => taskFn().catch(() => null));
     userQueues.set(userId, nextQueue);
-    
+
     nextQueue.then(() => {
         if (userQueues.get(userId) === nextQueue) {
             userQueues.delete(userId);
@@ -49,61 +54,67 @@ function enqueueTask(userId, taskFn) {
 
 async function deploySystemMessages(channel, roles, emojis) {
     const data = await getTrackedData();
-    
+
     const posts = [
         {
             key: 'age',
-            text: `**What's your age? (required.)**\n3️⃣ - 13\n4️⃣ - 14\n5️⃣ - 15\n6️⃣ - 16\n7️⃣ - 17\n8️⃣ - 18\n9️⃣ - 19`,
+            text: `**Required: What's your age?**\n-# Note: This is required in order to be able to chat in our server.\n\n3️⃣ - 13\n4️⃣ - 14\n5️⃣ - 15\n6️⃣ - 16\n7️⃣ - 17\n8️⃣ - 18\n9️⃣ - 19`,
             emojis: ['3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣'],
             context: 'age'
         },
         {
             key: 'littlespace',
-            text: `**Littlespace Roles**\n${emojis['pat_bab'] || '🍼'} - You're a Little.\n${emojis['cg_smirk'] || '🧸'} - You're a Caregiver.\n🔄 - You're a switch (both)`,
-            emojis: ['pat_bab', 'cg_smirk', '🔄'],
-            context: ''
+            text: `**Optional: Littlespace Roles**\n\n${emojis['pat_bab'] || '🍼'} - You're a Little.\n${emojis['cg_smirk'] || '🧸'} - You're a Caregiver.\n🔀 - You're a Flip (both)`,
+            emojis: ['pat_bab', 'cg_smirk', '🔀'],
+            context: 'littlespace'
         },
         {
             key: 'colors',
-            text: `**Color Roles**\n<@&${roles.color.red}> - 1\n<@&${roles.color.yellow}> - 2\n<@&${roles.color.green}> - 3\n<@&${roles.color.blue}> - 4\n<@&${roles.color.teal}> - 5\n<@&${roles.color['hot-pink']}> - 6\n<@&${roles.color['soft-pink']}> - 7\n<@&${roles.color.purple}> - 8\n<@&${roles.color.black}> - 9\n<@&${roles.color.orange}> - 10`,
+            text: `**Color Roles**\nThese color your display name/username in chat\n\nRed - 1\nYellow - 2\nGreen - 3\nBlue - 4\nTeal - 5\nHot Pink - 6\nSoft Pink - 7\nPurple - 8\nBlack - 9\nOrange - 10`,
             emojis: ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'],
-            context: ''
+            context: 'color'
         },
         {
             key: 'gender',
-            text: `**What's your gender? (optional)**\n🔵 - Boy\n🟣 - Girl\n🟢 - Non Binary\n🟡 - Gender Fluid\n🟠 - Deciding Gender`,
+            text: `**Optional: What's your gender?**\n\n🔵 - Boy\n🟣 - Girl\n🟢 - Non Binary\n🟡 - Gender Fluid\n🟠 - Deciding Gender`,
             emojis: ['🔵','🟣','🟢','🟡','🟠'],
             context: 'gender'
         },
         {
             key: 'sexuality',
-            text: `**Sexuality Roles**\nStraight - 1\nBisexual - 2\nGay - 3\nLesbian - 4\nPansexual - 5\nOther - 6`,
+            text: `**Optional: Sexuality Roles**\n\nStraight - 1\nBisexual - 2\nGay - 3\nLesbian - 4\nPansexual - 5\nOther - 6`,
             emojis: ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣'],
             context: 'sex'
         },
         {
+            key: 'ping_boundaries',
+            text: `**Recommended: Ping Boundaries:**\nShould members of this server ping you?\n-# Note: This does not apply to important staff matters, announcements, and PSAs\n\n✅ - Okay to Ping\n🛑 - Do Not Ping`,
+            emojis: ['✅', '🛑'],
+            context: 'ping_boundary'
+        },
+        {
+            key: 'tease_boundaries',
+            text: `**Recommended: Tease Boundaries**\nShould members of this server tease you?\n\n✅ - Okay to Tease\n❓ - Ask to Tease\n🛑 - Do Not Tease`,
+            emojis: ['✅', '❓', '🛑'],
+            context: 'tease'
+        },
+        {
             key: 'dm_boundaries',
-            text: `**DM Status; These reflect your boundaries.**\n🟢 - DMs Open\n🔴 - DMs Closed\n❓ - Ask to DM`,
-            emojis: ['🟢','🔴','❓'],
+            text: `**Recommended: DM Boundaries**\nShould members of this server send you DMs?\n\n✅ - DMs Open\n❓ - Ask to DM\n🛑 - DMs Closed`,
+            emojis: ['✅','❓','🛑'],
             context: 'dm'
         },
         {
             key: 'friend_boundaries',
-            text: `**Friend Requests. Do you want people in this server to send you friend requests?**\n🟢 - Friend Requests Open\n🔴 - Friend Requests Closed\n❓ - Ask to Friend`,
-            emojis: ['🟢','🔴','❓'],
+            text: `**Recommended: Friend Requests Boundaries**\n Should members of this server send you Friend Requests?\n\n✅ - Friend Requests Open\n❓ - Ask to Friend\n🛑 - Friend Requests Closed`,
+            emojis: ['✅','❓','🛑'],
             context: 'friend'
         },
         {
             key: 'pings',
-            text: `**Ping Roles**\nAnnouncement Ping - 1\nBump Ping - 2\nDead Chat Ping - 3\nVC Ping - 5\nBirthday Ping - 6`,
-            emojis: ['1️⃣','2️⃣','3️⃣','5️⃣','6️⃣'],
-            context: 'ping'
-        },
-        {
-            key: 'pad_art',
-            text: `**Padded Art Role**\n${emojis['color'] || '🎨'} - Padded Art`,
-            emojis: ['color'],
-            context: ''
+            text: `**Optional: Ping Roles**\nHere you can select what you would like to receieve notifications about\n-# Note: This does not apply to important announcements and PSAs.\n\nAnnouncement Ping - 📢\nBump Ping - 👊\nDead Chat Ping - 💬\nVC Ping - 🎤\nBirthday Ping - 🎉`,
+            emojis: ['📢','👊','💬','🎤','🎉'],
+            context: 'ping_notify'
         }
     ];
 
@@ -135,20 +146,20 @@ export const initReactionRoles = async (client, channels, roles, emojis) => {
         '8️⃣_age': roles.age['18'],
         '9️⃣_age': roles.age['19'],
 
-        'pat_bab': roles.littlespace.little,
-        'cg_smirk': roles.littlespace.caregiver,
-        '🔄': roles.littlespace.switch,
+        'pat_bab_littlespace': roles.littlespace.little,
+        'cg_smirk_littlespace': roles.littlespace.caregiver,
+        '🔀_littlespace': roles.littlespace.flip,
 
-        '1️⃣': roles.color.red,
-        '2️⃣': roles.color.yellow,
-        '3️⃣': roles.color.green,
-        '4️⃣': roles.color.blue,
-        '5️⃣': roles.color.teal,
-        '6️⃣': roles.color['hot-pink'],
-        '7️⃣': roles.color['soft-pink'],
-        '8️⃣': roles.color.purple,
-        '9️⃣': roles.color.black,
-        '🔟': roles.color.orange,
+        '1️⃣_color': roles.color.red,
+        '2️⃣_color': roles.color.yellow,
+        '3️⃣_color': roles.color.green,
+        '4️⃣_color': roles.color.blue,
+        '5️⃣_color': roles.color.teal,
+        '6️⃣_color': roles.color['hot-pink'],
+        '7️⃣_color': roles.color['soft-pink'],
+        '8️⃣_color': roles.color.purple,
+        '9️⃣_color': roles.color.black,
+        '🔟_color': roles.color.orange,
 
         '🔵_gender': roles.gender.boy,
         '🟣_gender': roles.gender.girl,
@@ -163,21 +174,26 @@ export const initReactionRoles = async (client, channels, roles, emojis) => {
         '5️⃣_sex': roles.sexuality.pansexual,
         '6️⃣_sex': roles.sexuality.other,
 
-        '🟢_dm': roles.boundary['dm-status'].open,
-        '🔴_dm': roles.boundary['dm-status'].closed,
-        '❓_dm': roles.boundary['dm-status'].ask,
+        '✅_ping_boundary': roles.boundary.ping.ok,
+        '🛑_ping_boundary': roles.boundary.ping.no,
 
-        '🟢_friend': roles.boundary['friend-request-status'].open,
-        '🔴_friend': roles.boundary['friend-request-status'].closed,
-        '❓_friend': roles.boundary['friend-request-status'].ask,
+        '✅_tease': roles.boundary.tease.ok,
+        '❓_tease': roles.boundary.tease.ask,
+        '🛑_tease': roles.boundary.tease.no,
 
-        '1️⃣_ping': roles.ping.announcement,
-        '2️⃣_ping': roles.ping.bump,
-        '3️⃣_ping': roles.ping['dead-chat'],
-        '5️⃣_ping': roles.ping['voice-chat'],
-        '6️⃣_ping': roles.ping.birthday,
+        '✅_dm': roles.boundary.dms.open,
+        '❓_dm': roles.boundary.dms.ask,
+        '🛑_dm': roles.boundary.dms.closed,
 
-        'color': roles.access['pad-art']
+        '✅_friend': roles.boundary['friend-requests'].open,
+        '❓_friend': roles.boundary['friend-requests'].ask,
+        '🛑_friend': roles.boundary['friend-requests'].closed,
+
+        '📢_ping_notify': roles.ping.announcement,
+        '👊_ping_notify': roles.ping.bump,
+        '💬_ping_notify': roles.ping['dead-chat'],
+        '🎤_ping_notify': roles.ping['voice-chat'],
+        '🎉_ping_notify': roles.ping.birthday
     };
 
     const channel = await client.channels.fetch(rolesChannelId).catch(() => null);
@@ -248,11 +264,7 @@ export const initReactionRoles = async (client, channels, roles, emojis) => {
                 if (hadRole === hasRole) continue;
 
                 const block = Object.values(data.deployments).find(d => {
-                    if (emojiKey.endsWith(`_${d.context}`) && d.context !== '') return true;
-                    if (!emojiKey.includes('_') && d.context === '') return true;
-                    if (['pat_bab', 'cg_smirk', '🔄'].includes(emojiKey) && d.id === data.deployments.littlespace?.id) return true;
-                    if (emojiKey === 'color' && d.id === data.deployments.pad_art?.id) return true;
-                    return false;
+                    return d.context && emojiKey.endsWith(`_${d.context}`);
                 });
 
                 if (!block) continue;
@@ -263,8 +275,8 @@ export const initReactionRoles = async (client, channels, roles, emojis) => {
                 let rawEmojiName = emojiKey.split('_')[0];
                 let targetReaction = message.reactions.cache.find(r => r.emoji.name === rawEmojiName);
 
-                if (!targetReaction && ['pat_bab', 'cg_smirk', 'color'].includes(emojiKey)) {
-                    const mappedCustomEmoji = emojis[emojiKey];
+                if (!targetReaction && ['pat_bab', 'cg_smirk'].includes(rawEmojiName)) {
+                    const mappedCustomEmoji = emojis[rawEmojiName];
                     if (mappedCustomEmoji) {
                         const customId = mappedCustomEmoji.match(/:(\d+)>$/)?.[1];
                         targetReaction = message.reactions.cache.find(r => r.emoji.id === customId);
@@ -273,12 +285,7 @@ export const initReactionRoles = async (client, channels, roles, emojis) => {
 
                 if (!targetReaction) continue;
 
-                if (hasRole) {
-                    const users = await targetReaction.users.fetch().catch(() => null);
-                    if (users && !users.has(newMember.id)) {
-                        await targetReaction.message.react(targetReaction.emoji).catch(() => null);
-                    }
-                } else {
+                if (!hasRole) {
                     const users = await targetReaction.users.fetch().catch(() => null);
                     if (users && users.has(newMember.id)) {
                         await targetReaction.users.remove(newMember.id).catch(() => null);

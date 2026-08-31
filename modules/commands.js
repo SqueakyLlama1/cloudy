@@ -21,12 +21,8 @@ export const initCommands = async (client, appId, secret, guildId, commands = []
 
         const { commandName } = interaction;
 
-        if (commandName === 'credits') {
-            await interaction.reply({content: `Lead Developer - <@1374553820591292487>\nContributor - <@1083102195337150505>`, ephemeral: true});
-        }
-
         if (commandName === 'minecraft') {
-            await interaction.reply(`Minecraft Server Details:\nJava: play.squeakyllama.com\nBedrock: play.squeakyllama.com | Port 19132\nNote: The server is not yet done.`);
+            await interaction.reply(`Java & Bedrock:\nIP: play.squeakyllama.com\nPort: 19132`);
         }
     });
 };

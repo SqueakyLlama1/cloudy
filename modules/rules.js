@@ -1,20 +1,29 @@
 const rules = {
-    "1.0": "All users must maintain a non-explicit environment. This applies to (but is not limited to:) jokes, imagery, conversations, and audio. This server accompanies minors, we cannot tolerate explicit material per Discord's Guidelines.",
-    "1.1": "For media/conversations that could be potentially triggering; ||Gun use, Drug Use, Suicide, Mental Health, Sexual Abuse, ETC|| please use the dedicated Sensitive topics channel for this purpose",
-    "1.2": "Baby talk, diaper usage, and discussions surrounding diapers are not permitted in the general channels. We have a dedicated ⁠littlespace / rp channel for this purpose.",
-    "1.3": "Please do not show pictures of you actively wearing a diaper in the little gear channel, or anywhere within the server. This causes the server to be limited. If you wish to show a user self-made content involving diapers, please do so consensually in their dms, not in the server.",
-    "1.4": "Media involving convicted predators ||(I.E. Jeffery Epstein, Diddy, etc.)|| and jokes surrounding them are not permitted.",
-    "1.5": "Please do not share scat when sharing padded artwork. 'Messy' images are fine with spoilers, as long as it's not 'Hyper-messing'. All content involved padded artwork belongs in the respective ⁠padded-artwork channel. You can access this channel by getting the sensitive art role in ⁠the roles channel.",
-    "1.6": "Gore, Shock Content, Excessive Blood, and general NSFL aren't permitted anywhere within server grounds, or anywhere for that matter.",
-    "1.7": "Do not share DM screenshots with anyone but staff, and especially do not post them in public channels.",
-    "2.0": "All users MUST respect one another's boundaries, both within server grounds and inside direct messaging. Failure to comply will result in an immediate removal of server privileges.",
-    "2.1": "All users of ages 16-19 must remain SFW and be mindful of age gaps when interacting with other server members. Failure to comply will result in an immediate removal of server privileges, and a PSA (Public Service Announcement) alert followed by your ban.",
-    "2.2": "All users must treat one another with utmost respect. Conflict within public channels must be avoided at all costs. If you feel like you are unable to de-escalate things with another member, please ping the Support Team, or DM an online staff member to help things de-escalate. NO RAGEBAITING, it's lame.",
-    "2.3": "To avoid conflict, the folowing are not permitted in public channels: Religion Talk, Political Talk, General Accusations.",
-    "2.4": "If you have a personal issue with another user, please utilize the ticket system, much rather than starting conflict in the public channels. Similarly, if your ticket did not get you the resolution you wanted, accept our decision.",
-    "2.5": "Do not advertise yourself. We are a TBDL focused server, but we are not a looking server. You are not permitted to primarily send messages that are looking for a CG, or a Little.",
-    "2.6": "Respect all staff members and respect their authority. If you don't like how a situation was handled, bring it up in a ticket. You are not permitted to hurl insults at anyone.",
-    "2.7": "Attempting to find 'loopholes' in the rules, and using that as plausible deniability will be rewarded with infractions. Even if it isn't explicitly said, if you believe it doesn't belong in the server, it doesn't. Use your brain."
+    "1.0": "All content must remain non-explicit and appropriate for minors. Sexual, fetish-oriented, or otherwise inappropriate content is prohibited, including in messages, jokes, media, audio, roleplay, profiles, and links.",
+
+    "1.1": "Potentially triggering topics, including violence, drug use, abuse, and serious mental health discussions, belong in 🫂┆sensitive-topics when appropriate. Graphic or disturbing content is not permitted.",
+
+    "1.2": "Age regression, baby talk, and regression-related behavior are welcome throughout general social spaces. Please avoid bringing baby talk or regression roleplay into special-purpose channels where it would be off-topic, such as media, support, or information channels.",
+
+    "1.3": "Diaper and regression gear discussions must remain non-sexual and appropriate. Do not post images of yourself actively wearing diapers or similarly intimate personal content anywhere in the server.",
+
+    "1.4": "Regression-related artwork must remain SFW and belong in its appropriate channel. Bodily waste, fetishistic content, gore, excessive blood, shock content, and NSFL material are prohibited.",
+
+    "1.5": "Do not publicly share private DM screenshots or personal information without permission. If evidence is needed for a report, provide it privately to staff.",
+
+    "2.0": "Respect other members' boundaries both in the server and in DMs. Do not pressure, harass, manipulate, or repeatedly contact someone after being asked to stop.",
+
+    "2.1": "All interactions must remain strictly SFW and appropriate. Be mindful of age differences, especially when interacting with younger members. Sexual, exploitative, or grooming-related behavior results in immediate removal.",
+
+    "2.2": "Treat others respectfully. Harassment, bullying, discrimination, targeted insults, ragebaiting, and deliberate conflict are not permitted. If a situation escalates, disengage and contact staff.",
+
+    "2.3": "Political or religious debates, public accusations, and deliberately inflammatory discussions are not permitted in public channels. Personal disputes should be handled through tickets or staff.",
+
+    "2.4": "This is an age regression community, not a matchmaking or relationship-seeking server. Do not use the server primarily to search for caregivers, littles, partners, or similar relationships.",
+
+    "2.5": "Follow reasonable staff instructions and communicate respectfully. If you disagree with a decision, use the appropriate ticket or appeal process rather than creating public conflict.",
+
+    "2.6": "Attempting to exploit loopholes or intentionally bypass the spirit of the rules may result in moderation action. Not every inappropriate behavior can be specifically listed—use reasonable judgment."
 };
 
 export const initRules = async (client) => {
